@@ -1,0 +1,49 @@
+{
+ "model": "Model_2_1_1",
+ "seed": 0,
+ "u1_pin": 0.01,
+ "kappa": 5.0,
+ "calib": {
+  "conjunction": 0.85,
+  "inverse": 0.65,
+  "time_axis": 0.63,
+  "denominator_neglect": 0.7,
+  "base_rate_neglect": 0.67
+ },
+ "homing": {
+  "conjunction": "kc1_sample_space",
+  "inverse": "kc2_conditioning",
+  "time_axis": "kc2_conditioning",
+  "denominator_neglect": "kc4_total_probability",
+  "base_rate_neglect": "kc5_bayes_update"
+ },
+ "n_folds": 26,
+ "folds": [
+  "fold_P01.json",
+  "fold_P02.json",
+  "fold_P03.json",
+  "fold_P04.json",
+  "fold_P05.json",
+  "fold_P06.json",
+  "fold_P07.json",
+  "fold_P08.json",
+  "fold_P09.json",
+  "fold_P10.json",
+  "fold_P11.json",
+  "fold_P12.json",
+  "fold_P13.json",
+  "fold_P14.json",
+  "fold_P15.json",
+  "fold_P16.json",
+  "fold_P17.json",
+  "fold_P18.json",
+  "fold_P19.json",
+  "fold_P20.json",
+  "fold_P21.json",
+  "fold_P22.json",
+  "fold_P23.json",
+  "fold_P24.json",
+  "fold_P25.json",
+  "fold_P26.json"
+ ]
+}
