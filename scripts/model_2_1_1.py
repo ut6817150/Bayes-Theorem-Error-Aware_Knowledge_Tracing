@@ -51,7 +51,7 @@ CALIB = {
 }
 
 U1_PIN = 0.01      # mastered fire rate, pinned, never fitted
-KAPPA = 5.0        # shrinkage pseudo-count toward the calibration anchor
+KAPPA = 5.0        # shrinkage pseudo-count toward the calibration anchor (found through experimentation on models 2.1.1 and 2.2)
 U0_LO, U0_HI = 0.1, 0.9
 
 
