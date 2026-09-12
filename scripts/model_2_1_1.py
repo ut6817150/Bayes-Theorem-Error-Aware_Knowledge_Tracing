@@ -41,17 +41,22 @@ FLAG_HOME = {
     "base_rate_neglect": "kc5_bayes_update",
 }
 
-# Published written-format calibration anchors (approximate error rates).
+# Published written-format calibration centers (error rates), per the
+# report's cited figures: CPR uninstructed percent-correct inverted
+# (Diaz and Batanero 2009), conjunction 21% correct, inverse 35%,
+# time-axis 37%, denominator/total-probability 18%, base-rate (cab) 33%.
 CALIB = {
-    "conjunction": 0.85,
+    "conjunction": 0.79,
     "inverse": 0.65,
     "time_axis": 0.63,
-    "denominator_neglect": 0.70,
+    "denominator_neglect": 0.82,
     "base_rate_neglect": 0.67,
 }
 
 U1_PIN = 0.01      # mastered fire rate, pinned, never fitted
 KAPPA = 5.0        # shrinkage pseudo-count toward the calibration anchor (found through experimentation on models 2.1.1 and 2.2)
+                   # after post-hoc sensitivity sweeps over {0, 1, 2, 3, 4, 5, 10, 20, 50}
+                   # showed a flat surface (kappa_sweep_m2_1_1.csv); the sweeps are
 U0_LO, U0_HI = 0.1, 0.9
 
 

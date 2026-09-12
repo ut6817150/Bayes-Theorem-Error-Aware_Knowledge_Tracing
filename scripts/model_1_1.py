@@ -2,6 +2,8 @@
 compensatory-mean recombination. The per-cell annotation is unused by design."""
 import numpy as np
 import pandas as pd
+import os
+import json
 
 KC_COLS = ["kc1_sample_space", "kc2_conditioning", "kc3_joint_chain",
            "kc4_total_probability", "kc5_bayes_update"]
@@ -127,3 +129,46 @@ class Model_1_1:
             for k in kcs:
                 states[k] = self.chains[k].update(states[k], y)
         return pd.DataFrame(out)
+
+def save_model_1_1_from_evaluator(ev, out_dir):
+    """Dump a completed Evaluator run for the classic BKT baseline.
+
+    Writes, under out_dir/<ModelClassName>/:
+      fold_<pid>.json   one per fold: the five fitted chains' parameters
+      predictions.csv   the pooled LOPO prediction rows
+      metrics.json      the run's metric dict
+      index.json        class name, seed, fold list
+
+    Pure dump, no refitting: reads ev.fold_models, ev.predictions,
+    ev.metrics. Returns the class directory path.
+    """
+    if not getattr(ev, "fold_models", None):
+        raise ValueError("evaluator has no fold_models; call ev.run() first")
+
+    cls = ev.model_class
+    cdir = os.path.join(out_dir, cls.__name__)
+    os.makedirs(cdir, exist_ok=True)
+
+    folds = []
+    for pid in sorted(ev.fold_models):
+        m = ev.fold_models[pid]
+        rec = dict(heldout=pid,
+                   chains={kc: dict(L0=float(ch.L0), T=float(ch.T),
+                                    g=float(ch.g), s=float(ch.s))
+                           for kc, ch in m.chains.items()})
+        fname = f"fold_{pid}.json"
+        with open(os.path.join(cdir, fname), "w") as f:
+            json.dump(rec, f, indent=1)
+        folds.append(fname)
+
+    ev.predictions.to_csv(os.path.join(cdir, "predictions.csv"), index=False)
+
+    with open(os.path.join(cdir, "metrics.json"), "w") as f:
+        json.dump({k: float(v) for k, v in ev.metrics.items()}, f, indent=1)
+
+    index = dict(model=cls.__name__, seed=ev.seed,
+                 n_folds=len(folds), folds=folds)
+    with open(os.path.join(cdir, "index.json"), "w") as f:
+        json.dump(index, f, indent=1)
+
+    return cdir
