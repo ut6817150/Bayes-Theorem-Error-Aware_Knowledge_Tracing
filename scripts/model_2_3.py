@@ -27,16 +27,15 @@ import json
 
 import numpy as np
 
-from scripts.model_2_1_1 import (Model_2_1_1, KC_COLS, FLAGS, FLAG_HOME,
-                                 CALIB, U1_PIN, KAPPA)
+from scripts.model_2_1_1 import Model_2_1_1_Joint, FLAG_HOME
 from scripts.model_2_2 import BIAS_FLAGS, SKILL_FLAGS
 
 M_GRID = [0.0, 0.25, 0.5, 0.75, 1.0]
 
 
-class Model_2_3(Model_2_1_1):
-    """M2.2's chassis with the hard gate softened to two fitted
-    per-class tau-multipliers."""
+class Model_2_3(Model_2_1_1_Joint):
+    """The class-aware freeze softened to two fitted per-class
+    tau-multipliers on the canonical chassis. Emission untouched."""
 
     def __init__(self, train_df, n_restarts=5, seed=42, chain_cache=None):
         super().__init__(train_df, n_restarts=n_restarts, seed=seed,
@@ -44,7 +43,7 @@ class Model_2_3(Model_2_1_1):
         self.m_bias = 0.0
         self.m_skill = 1.0
 
-    def _update_states(self, row, states):
+    def _before_update(self, row, states):
         hit = states.setdefault("_hit", {"bias": set(), "skill": set()})
         for f in BIAS_FLAGS:
             if getattr(row, f) == "fired":
@@ -52,29 +51,15 @@ class Model_2_3(Model_2_1_1):
         for f in SKILL_FLAGS:
             if getattr(row, f) == "fired":
                 hit["skill"].add(FLAG_HOME[f])
-        ff = self._flag_factors(row)
-        for k in KC_COLS:
-            cell = getattr(row, k)
-            ch = self.chains[k]
-            has_cell = cell in ("correct", "wrong")
-            l1, l0 = ff.get(k, (1.0, 1.0))
-            if not has_cell and (l1, l0) == (1.0, 1.0):
-                continue
-            if has_cell:
-                y = 1 if cell == "correct" else 0
-                e1 = (1 - ch.s) if y == 1 else ch.s
-                e0 = ch.g if y == 1 else (1 - ch.g)
-                l1, l0 = l1 * e1, l0 * e0
-            m = states[k]
-            num = m * l1
-            den = num + (1 - m) * l0
-            post = num / den if den > 0 else m
-            mult = 1.0
-            if k in hit["bias"]:
-                mult = min(mult, self.m_bias)
-            if k in hit["skill"]:
-                mult = min(mult, self.m_skill)
-            states[k] = post + (1 - post) * ch.T * mult
+
+    def _T(self, k, states):
+        hit = states.get("_hit", {"bias": set(), "skill": set()})
+        mult = 1.0
+        if k in hit["bias"]:
+            mult = min(mult, self.m_bias)
+        if k in hit["skill"]:
+            mult = min(mult, self.m_skill)
+        return self.chains[k].T * mult
 
     def fit(self):
         self._fit_chains()
@@ -105,7 +90,7 @@ class Model_2_3(Model_2_1_1):
 def save_model_2_3_from_evaluator(ev, out_dir):
     """Dump a completed Evaluator run for the persistence-dial model.
     Writes per-fold jsons (bridge, shape with the fitted multipliers,
-    u-tables), the pooled predictions, the metrics, and an index."""
+    q-tables), the pooled predictions, the metrics, and an index."""
     if not getattr(ev, "fold_models", None):
         raise ValueError("evaluator has no fold_models; call ev.run() first")
     cls = ev.model_class
@@ -116,7 +101,7 @@ def save_model_2_3_from_evaluator(ev, out_dir):
         m = ev.fold_models[pid]
         rec = dict(heldout=pid, s0=float(m.s0), g0=float(m.g0),
                    shape={k: float(v) for k, v in m.shape.items()},
-                   u0={f: float(v) for f, v in m.u0.items()})
+                   q0={f: float(v) for f, v in m.q0.items()})
         fname = f"fold_{pid}.json"
         with open(os.path.join(cdir, fname), "w") as f:
             json.dump(rec, f, indent=1)
@@ -124,8 +109,8 @@ def save_model_2_3_from_evaluator(ev, out_dir):
     ev.predictions.to_csv(os.path.join(cdir, "predictions.csv"), index=False)
     with open(os.path.join(cdir, "metrics.json"), "w") as f:
         json.dump({k: float(v) for k, v in ev.metrics.items()}, f, indent=1)
-    index = dict(model=cls.__name__, seed=ev.seed, u1_pin=U1_PIN, kappa=KAPPA,
-                 calib=CALIB, homing=FLAG_HOME, bias_class=BIAS_FLAGS,
+    index = dict(model=cls.__name__, seed=ev.seed, emission='joint',
+                 homing=FLAG_HOME, bias_class=BIAS_FLAGS,
                  skill_class=SKILL_FLAGS, m_grid=M_GRID,
                  n_folds=len(folds), folds=folds)
     with open(os.path.join(cdir, "index.json"), "w") as f:

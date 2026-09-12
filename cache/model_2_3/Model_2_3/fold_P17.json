@@ -1,0 +1,17 @@
+{
+ "heldout": "P17",
+ "s0": 0.083225,
+ "g0": 0.128075,
+ "shape": {
+  "w_mix": 0.4,
+  "m_bias": 0.0,
+  "m_skill": 0.0
+ },
+ "q0": {
+  "conjunction": 0.12057451054558582,
+  "inverse": 0.5,
+  "time_axis": 0.7153839500684154,
+  "denominator_neglect": 0.6751596650353457,
+  "base_rate_neglect": 0.4275016379635183
+ }
+}

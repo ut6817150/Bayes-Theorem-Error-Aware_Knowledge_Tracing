@@ -1,15 +1,15 @@
 {
  "heldout": "P15",
- "s0": 0.068275,
- "g0": 0.13555,
+ "s0": 0.07575,
+ "g0": 0.157975,
  "shape": {
   "w_mix": 0.4
  },
- "u0": {
-  "conjunction": 0.7156123580879173,
-  "inverse": 0.4703841469603381,
-  "time_axis": 0.6068813864873712,
-  "denominator_neglect": 0.30403758159880434,
-  "base_rate_neglect": 0.2475757145756794
+ "q0": {
+  "conjunction": 0.17326991437310446,
+  "inverse": 0.5,
+  "time_axis": 0.732973245259645,
+  "denominator_neglect": 0.6915909540601557,
+  "base_rate_neglect": 0.46402944147165526
  }
 }

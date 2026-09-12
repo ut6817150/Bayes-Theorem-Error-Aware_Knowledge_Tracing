@@ -1,15 +1,7 @@
 {
  "model": "Model_2_2",
  "seed": 0,
- "u1_pin": 0.01,
- "kappa": 5.0,
- "calib": {
-  "conjunction": 0.85,
-  "inverse": 0.65,
-  "time_axis": 0.63,
-  "denominator_neglect": 0.7,
-  "base_rate_neglect": 0.67
- },
+ "emission": "joint",
  "homing": {
   "conjunction": "kc1_sample_space",
   "inverse": "kc2_conditioning",

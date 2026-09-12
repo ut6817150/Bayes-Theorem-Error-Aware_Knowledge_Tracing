@@ -104,34 +104,14 @@ class Model_2_2_Unratcheted(Model_2_2):
     """M2.2 with forgiveness on counter-evidence: a bias-class quiet on
     the frozen home KC unfreezes it; a later fire freezes it again."""
 
-    def _update_states(self, row, states):
+    def _before_update(self, row, states):
         frozen = states.setdefault("_frozen", set())
         for f in BIAS_FLAGS:
-            v = getattr(row, f)
-            if v == "quiet":
+            if getattr(row, f) == "quiet":
                 frozen.discard(FLAG_HOME[f])
         for f in BIAS_FLAGS:
             if getattr(row, f) == "fired":
                 frozen.add(FLAG_HOME[f])
-        ff = self._flag_factors(row)
-        for k in KC_COLS:
-            cell = getattr(row, k)
-            ch = self.chains[k]
-            has_cell = cell in ("correct", "wrong")
-            l1, l0 = ff.get(k, (1.0, 1.0))
-            if not has_cell and (l1, l0) == (1.0, 1.0):
-                continue
-            if has_cell:
-                y = 1 if cell == "correct" else 0
-                e1 = (1 - ch.s) if y == 1 else ch.s
-                e0 = ch.g if y == 1 else (1 - ch.g)
-                l1, l0 = l1 * e1, l0 * e0
-            m = states[k]
-            num = m * l1
-            den = num + (1 - m) * l0
-            post = num / den if den > 0 else m
-            T = 0.0 if k in frozen else ch.T
-            states[k] = post + (1 - post) * T
 
 
 def save_ablation_from_evaluator(ev, out_dir):
@@ -150,6 +130,8 @@ def save_ablation_from_evaluator(ev, out_dir):
                    shape={k: float(v) for k, v in getattr(m, "shape", {}).items()})
         if getattr(m, "u0", None):
             rec["u0"] = {f: float(v) for f, v in m.u0.items()}
+        if getattr(m, "q0", None):
+            rec["q0"] = {f: float(v) for f, v in m.q0.items()}
         if getattr(m, "v1", None):
             rec["v1"] = {f: float(v) for f, v in m.v1.items()}
             rec["b0"] = {k: float(v) for k, v in m.b0.items()}

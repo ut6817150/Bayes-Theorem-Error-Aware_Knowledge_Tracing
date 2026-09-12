@@ -1,0 +1,15 @@
+{
+ "heldout": "P04",
+ "s0": 0.083225,
+ "g0": 0.10565,
+ "shape": {
+  "w_mix": 0.4
+ },
+ "q0": {
+  "conjunction": 0.12057451054558582,
+  "inverse": 0.5,
+  "time_axis": 0.8315845312679966,
+  "denominator_neglect": 0.6771247505049197,
+  "base_rate_neglect": 0.42750163796351853
+ }
+}
